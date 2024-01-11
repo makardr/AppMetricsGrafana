@@ -72,8 +72,8 @@ app.Run();
 //     .Report.ToConsole()
 //     .Report.ToHostedMetrics(
 //         options => {
-//             options.HostedMetrics.BaseUri = new Uri("https://graphite-prod-24-prod-eu-west-2.grafana.net/graphite");
-//             options.HostedMetrics.ApiKey = "1361264:glc_eyJvIjoiMTAyNDMzOSIsIm4iOiJzdGFjay04MjU5MDEtaG0tcmVhZC1yZWFkLXRva2VuIiwiayI6IjVnSVVBZjg0WHNtNXA0MVlaMTJIczI2ZiIsIm0iOnsiciI6InByb2QtZXUtd2VzdC0yIn19";
+//             options.HostedMetrics.BaseUri = new Uri("");
+//             options.HostedMetrics.ApiKey = "";
 //             options.HttpPolicy.BackoffPeriod = TimeSpan.FromSeconds(30);
 //             options.HttpPolicy.FailuresBeforeBackoff = 5;
 //             options.HttpPolicy.Timeout = TimeSpan.FromSeconds(10);
