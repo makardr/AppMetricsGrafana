@@ -1,33 +1,28 @@
+using System.Net.Http.Headers;
 using System.Text;
 using App.Metrics;
+using AppMetricsGrafana.Metrics;
+
+
+var apiCode = "";
 
 var builder = WebApplication.CreateBuilder(args);
 
 var metricsBuilder = new MetricsBuilder()
-    .Report.ToConsole()
-    .OutputMetrics.AsPlainText()
-    .OutputMetrics.AsJson();
+        .Report.ToConsole()
+        .OutputMetrics.AsPlainText()
+        .OutputMetrics.AsJson()
+        .OutputMetrics.AsPrometheusPlainText()
+        .OutputMetrics.AsPrometheusProtobuf()
+    ;
 
 var metrics = metricsBuilder.Build();
-
-var snapshot = metrics.Snapshot.Get();
-
-foreach(var formatter in metrics.OutputMetricsFormatters)
-{
-    using (var stream = new MemoryStream())
-    {
-        await formatter.WriteAsync(stream, snapshot);
-
-        var result = Encoding.UTF8.GetString(stream.ToArray());
-
-        Console.WriteLine(result);
-    }
-}
-
 
 builder.Services.AddMetrics(metrics);
 
 builder.WebHost.UseMetricsWebTracking();
+
+//Output to /metrics
 // builder.WebHost.UseMetrics(options => { options.EndpointOptions = endpointOptions =>
 // {
 //     // Output of the metrics text version, protobuff is more efficient
@@ -62,34 +57,37 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+
+var snapshot = metrics.Snapshot.Get();
+
+
+foreach (var formatter in metrics.OutputMetricsFormatters)
+{
+    using (var stream = new MemoryStream())
+    {
+        await formatter.WriteAsync(stream, snapshot);
+        var httpContent = new ByteArrayContent(stream.ToArray());
+        //Output result as text in the console
+        var result = Encoding.UTF8.GetString(stream.ToArray());
+        Console.WriteLine(result);
+
+        SendRequest(httpContent);
+    }
+}
+
+
 app.Run();
 
 
+metrics.Measure.Counter.Increment(MetricsRegistry.ExampleCounterOptions, 1);
 
-// var filter = new MetricsFilter().WhereType(MetricType.Counter);
-
-// var metrics = new MetricsBuilder()
-//     .Report.ToConsole()
-//     .Report.ToHostedMetrics(
-//         options => {
-//             options.HostedMetrics.BaseUri = new Uri("https://graphite-prod-24-prod-eu-west-2.grafana.net/graphite");
-//             options.HostedMetrics.ApiKey = "1361264:glc_eyJvIjoiMTAyNDMzOSIsIm4iOiJzdGFjay04MjU5MDEtaG0tcmVhZC1yZWFkLXRva2VuIiwiayI6IjVnSVVBZjg0WHNtNXA0MVlaMTJIczI2ZiIsIm0iOnsiciI6InByb2QtZXUtd2VzdC0yIn19";
-//             options.HttpPolicy.BackoffPeriod = TimeSpan.FromSeconds(30);
-//             options.HttpPolicy.FailuresBeforeBackoff = 5;
-//             options.HttpPolicy.Timeout = TimeSpan.FromSeconds(10);
-//             // options.Filter = filter;
-//             options.FlushInterval = TimeSpan.FromSeconds(10);
-//         })
-//     .OutputMetrics.AsPlainText()
-//     .Build();
-
-// var metrics = new MetricsBuilder()
-//     .Report.ToConsole()
-//     .Build();
-
-
-// builder.Services.AddSingleton<IMetrics>(metrics);
-
-// builder.Services.AddAppMetricsGcEventsMetricsCollector();
-// builder.Services.AddAppMetricsSystemMetricsCollector();
-// builder.Services.AddAppMetricsCollectors();
+async void SendRequest(HttpContent httpContent)
+{
+    HttpClient client = new HttpClient();
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiCode);
+    HttpResponseMessage response =
+        await client.PostAsync("https://metrics.cockpit.fr-par.scw.cloud/api/v1/push", httpContent);
+    Console.WriteLine(response.StatusCode);
+    string responseContent = await response.Content.ReadAsStringAsync();
+    Console.WriteLine(responseContent);
+}
