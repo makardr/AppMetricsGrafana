@@ -1,0 +1,14 @@
+metrics:
+  wal_directory: /tmp/agent
+  global:
+    scrape_interval: 60s
+  configs:
+    - name: prometheus_scrape
+      scrape_configs:
+        - job_name: 'prometheus_metrics'
+          static_configs:
+            - targets: [host.docker.internal:5149]
+      remote_write:
+        - url: https://metrics.cockpit.fr-par.scw.cloud/api/v1/push
+          headers:
+            "X-Token": <token here>
