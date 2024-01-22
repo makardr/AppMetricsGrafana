@@ -7,15 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="App.Metrics" Version="4.4.0-preview.0.4" />
-        <PackageReference Include="App.Metrics.AspNetCore" Version="4.4.0-preview.0.10" />
-        <PackageReference Include="App.Metrics.AspNetCore.Endpoints" Version="4.4.0-preview.0.10" />
-        <PackageReference Include="App.Metrics.AspNetCore.Tracking" Version="4.4.0-preview.0.10" />
-        <PackageReference Include="App.Metrics.Formatters.Prometheus" Version="4.4.0-preview.0.10" />
-        <PackageReference Include="App.Metrics.Prometheus" Version="4.3.0" />
-        <PackageReference Include="App.Metrics.Reporting.Console" Version="4.4.0-preview.0.10" />
+        <PackageReference Include="App.Metrics" Version="4.3.0" />
+        <PackageReference Include="App.Metrics.AspNetCore" Version="4.3.0" />
+        <PackageReference Include="App.Metrics.Formatters.Prometheus" Version="4.3.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.11"/>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0"/>
     </ItemGroup>
 
