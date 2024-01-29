@@ -24,6 +24,7 @@ public class ExampleController : ControllerBase
     [HttpGet("echo/{text}")]
     public String Echo(string text)
     {
+        _logger.LogInformation("Received message: {message}",text);
         return text;
     }
 

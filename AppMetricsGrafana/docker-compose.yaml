@@ -1,17 +1,26 @@
 version: "3"
 services:
+  app:
+    image: mcr.microsoft.com/dotnet/sdk:7.0
+    command: bash -c "dotnet restore AppMetricsGrafana.csproj && dotnet build AppMetricsGrafana.csproj && dotnet run --urls http://+:5000"
+    working_dir: /app
+    volumes:
+      - ./:/app  #Mounting current directory from the host to the /app in the container This means that the application can access the files in the current directory as if they were in /app inside the container.
+    ports:
+      - "5000:5000"  #container's port 5000 to the host's port 5000
+  
   agent:
     image: grafana/agent:latest
     restart: always
-    ports:
-      - "9412:9412"
     volumes:
       - "./config.yaml:/etc/agent-config/agent.yaml:ro"
       - "/:/host/root:ro"
       - "/tmp/agent:/etc/agent"
+      - "/var/lib/docker/containers/:/var/log/dockerlogs:ro"  # mount folder with all container logs from docker into container in readonly, folder "dockerlogs" needs to be manually created
     entrypoint:
       - /bin/grafana-agent
       - -config.file=/etc/agent-config/agent.yaml
       - -metrics.wal-directory=/tmp/agent/wal
     network_mode: "host"
     pid: "host"
+    
