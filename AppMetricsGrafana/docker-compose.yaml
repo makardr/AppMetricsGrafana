@@ -16,7 +16,7 @@ services:
       - "./config.yaml:/etc/agent-config/agent.yaml:ro"
       - "/:/host/root:ro"
       - "/tmp/agent:/etc/agent"
-      - "/var/lib/docker/containers/:/var/log/dockerlogs:ro"  # mount folder with all container logs from docker into container in readonly, folder "dockerlogs" needs to be manually created
+      - "/var/lib/docker/containers/:/var/log/docker_logs:ro"  # mount folder with all container logs from docker into container in readonly
     entrypoint:
       - /bin/grafana-agent
       - -config.file=/etc/agent-config/agent.yaml
