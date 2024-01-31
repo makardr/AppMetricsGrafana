@@ -11,7 +11,7 @@ metrics:
       remote_write:
         - url: https://metrics.cockpit.fr-par.scw.cloud/api/v1/push
           headers:
-            "X-Token": <Scaleway toke id>
+            "X-Token": <Scaleway token id>
             
 logs:
   positions_directory: /tmp/positions/
