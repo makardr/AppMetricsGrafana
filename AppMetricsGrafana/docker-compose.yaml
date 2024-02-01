@@ -11,7 +11,10 @@ services:
   
   agent:
     image: grafana/agent:latest
-    restart: always
+    environment:
+      - SCW_API_KEY=${SCW_API_KEY}
+    command: ["-config.expand-env"]
+    restart: on-failure
     volumes:
       - "./config.yaml:/etc/agent-config/agent.yaml:ro"
       - "/:/host/root:ro"

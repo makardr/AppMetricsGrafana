@@ -1,7 +1,7 @@
-metrics:
+﻿metrics:
   wal_directory: /tmp/agent
   global:
-    scrape_interval: 10s
+    scrape_interval: 15s
   configs:
     - name: prometheus_scrape
       scrape_configs:
@@ -11,7 +11,7 @@ metrics:
       remote_write:
         - url: https://metrics.cockpit.fr-par.scw.cloud/api/v1/push
           headers:
-            "X-Token": <Scaleway token id>
+            "X-Token": ${SCW_API_KEY}
             
 logs:
   positions_directory: /tmp/positions/
@@ -19,7 +19,7 @@ logs:
     - name: scw
       clients:
         - url: https://logs.cockpit.fr-par.scw.cloud/loki/api/v1/push
-          tenant_id: <Scaleway token id>
+          tenant_id: ${SCW_API_KEY}
       scrape_configs:
         - job_name: appmetrics_logs
           static_configs:
