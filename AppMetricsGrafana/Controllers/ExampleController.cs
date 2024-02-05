@@ -24,7 +24,7 @@ public class ExampleController : ControllerBase
     [HttpGet("echo/{text}")]
     public String Echo(string text)
     {
-        _logger.LogInformation("Received message: {message}",text);
+        _logger.LogInformation("Received message: {message}", text);
         return text;
     }
 
@@ -65,13 +65,13 @@ public class ExampleController : ControllerBase
         _metrics.Measure.Gauge.SetValue(MetricsRegistry.ProcessPhysicalMemoryGauge, memory / 1024.0 / 1024.0);
         return memory;
     }
-    
+
     [HttpGet("OutputMetrics")]
     public async void OutputMetrics()
     {
         var snapshot = _metrics.Snapshot.Get();
 
-        foreach(var formatter in _metrics.OutputMetricsFormatters)
+        foreach (var formatter in _metrics.OutputMetricsFormatters)
         {
             using (var stream = new MemoryStream())
             {
@@ -82,6 +82,31 @@ public class ExampleController : ControllerBase
                 Console.WriteLine(result);
             }
         }
+    }
 
+    [HttpGet("MeasureTimer/{milliseconds}")]
+    public string MeasureTimer(int milliseconds)
+    {
+        // var tags = new MetricTags(
+        //     new[] { "client_idKey", "routeKey", "testKey3" },
+        //     new[] { "clientIdValue", "routeTemplateValue", "testValue3" }
+        // );
+        var tags = new MetricTags(
+            new[] { "sleepTime" },
+            new[] { milliseconds.ToString() }
+        );
+
+        using (_metrics.Measure.Timer.Time(MetricsRegistry.ExampleTimerOptions, tags))
+        {
+            MeasuredMethod(milliseconds);
+        }
+
+        return "Request processed after " + milliseconds + "milliseconds";
+    }
+
+
+    private static void MeasuredMethod(int milliseconds)
+    {
+        Thread.Sleep(milliseconds);
     }
 }

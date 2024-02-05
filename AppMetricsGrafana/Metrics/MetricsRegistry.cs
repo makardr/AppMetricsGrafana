@@ -1,6 +1,7 @@
 ﻿using App.Metrics;
 using App.Metrics.Counter;
 using App.Metrics.Gauge;
+using App.Metrics.Timer;
 
 namespace AppMetricsGrafana.Metrics;
 
@@ -32,5 +33,14 @@ public class MetricsRegistry
         Name = "ExampleMemoryGauge",
         Context = "ExampleMetricsApi",
         MeasurementUnit = Unit.MegaBytes
+    };
+
+    public static TimerOptions ExampleTimerOptions => new TimerOptions()
+    {
+        Name = "ExampleTimerOptions",
+        Context = "ExampleMetricsApi",
+        MeasurementUnit = Unit.Calls,
+        DurationUnit = TimeUnit.Milliseconds,
+        RateUnit = TimeUnit.Milliseconds
     };
 }
