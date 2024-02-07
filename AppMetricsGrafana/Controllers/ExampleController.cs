@@ -87,13 +87,9 @@ public class ExampleController : ControllerBase
     [HttpGet("MeasureTimer/{milliseconds}")]
     public string MeasureTimer(int milliseconds)
     {
-        // var tags = new MetricTags(
-        //     new[] { "client_idKey", "routeKey", "testKey3" },
-        //     new[] { "clientIdValue", "routeTemplateValue", "testValue3" }
-        // );
         var tags = new MetricTags(
-            new[] { "sleepTime" },
-            new[] { milliseconds.ToString() }
+            new[] { "client_idKey", "routeKey", "testKey3" },
+            new[] { "clientIdValue", "routeTemplateValue", "testValue3" }
         );
 
         using (_metrics.Measure.Timer.Time(MetricsRegistry.ExampleTimerOptions, tags))
@@ -104,6 +100,13 @@ public class ExampleController : ControllerBase
         return "Request processed after " + milliseconds + "milliseconds";
     }
 
+
+    [HttpGet("UpdateHistogram/{number}")]
+    public string UpdateHistogram(int number)
+    {
+        _metrics.Measure.Histogram.Update(MetricsRegistry.ExampleHistogramOptions, number);
+        return "Histogram observed " + number;
+    }
 
     private static void MeasuredMethod(int milliseconds)
     {

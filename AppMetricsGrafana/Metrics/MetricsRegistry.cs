@@ -1,6 +1,7 @@
 ﻿using App.Metrics;
 using App.Metrics.Counter;
 using App.Metrics.Gauge;
+using App.Metrics.Histogram;
 using App.Metrics.Timer;
 
 namespace AppMetricsGrafana.Metrics;
@@ -42,5 +43,12 @@ public class MetricsRegistry
         MeasurementUnit = Unit.Calls,
         DurationUnit = TimeUnit.Milliseconds,
         RateUnit = TimeUnit.Milliseconds
+    };
+    
+    public static HistogramOptions ExampleHistogramOptions => new HistogramOptions()
+    {
+        Name = "ExampleHistogramOptions",
+        Context = "ExampleMetricsApi",
+        MeasurementUnit = Unit.KiloBytes
     };
 }

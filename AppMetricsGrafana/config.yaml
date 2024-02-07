@@ -5,7 +5,7 @@
   configs:
     - name: prometheus_scrape
       scrape_configs:
-        - job_name: 'prometheus_metrics'
+        - job_name: 'app_metrics_example_job'
           static_configs:
             - targets: [host.docker.internal:5000]
       remote_write:
