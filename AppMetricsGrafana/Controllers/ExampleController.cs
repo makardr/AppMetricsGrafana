@@ -112,4 +112,13 @@ public class ExampleController : ControllerBase
     {
         Thread.Sleep(milliseconds);
     }
+
+    [HttpGet("WriteLog/{number}")]
+    public string WriteLog(int number)
+    {
+        Random rnd = new Random();
+        int randomNumber = rnd.Next(1, 100);
+        _logger.LogInformation("Logged number is {number} and logged number is {randomNumber}", number, randomNumber);
+        return "Log created with logged number " + number + " and random number " + randomNumber;
+    }
 }

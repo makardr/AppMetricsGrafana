@@ -1,19 +1,28 @@
-version: "3"
+version: "3.9"
 services:
   app:
-    image: mcr.microsoft.com/dotnet/sdk:7.0
-    command: bash -c "dotnet restore AppMetricsGrafana.csproj && dotnet build AppMetricsGrafana.csproj && dotnet run --urls http://+:5000"
-    working_dir: /app
-    volumes:
-      - ./:/app  #Mounting current directory from the host to the /app in the container This means that the application can access the files in the current directory as if they were in /app inside the container.
+    container_name: dotnet_application
+    #    Build and launch application using only docker-compose
+    #    image: mcr.microsoft.com/dotnet/sdk:7.0
+    #    command: bash -c "dotnet restore AppMetricsGrafana.csproj && dotnet build AppMetricsGrafana.csproj && dotnet run --urls http://+:5000"
+    #    working_dir: /app
+    #    volumes:
+    #      - ./:/app  #Mounting current directory from the host to the /app in the container This means that the application can access the files in the current directory as if they were in /app inside the container.
+    
+    #    Launch application using Dockerfile, requires Kestrel section in appsettings
+    build:
+      context: .
+      dockerfile: Dockerfile
+    
+    #    Expose ports from host to container
     ports:
-      - "5000:5000"  #container's port 5000 to the host's port 5000
+      - "5000:5050"  #First is the host port to reroute container into, the second port is to reroute from the container
   
   agent:
     image: grafana/agent:latest
     environment:
       - SCW_API_KEY=${SCW_API_KEY}
-    command: ["-config.expand-env"]
+    command: [ "-config.expand-env" ]
     restart: on-failure
     volumes:
       - "./config.yaml:/etc/agent-config/agent.yaml:ro"
