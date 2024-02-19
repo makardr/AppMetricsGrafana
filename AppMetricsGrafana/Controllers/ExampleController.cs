@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using App.Metrics;
+using App.Metrics.Timer;
 using AppMetricsGrafana.Metrics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -92,14 +93,38 @@ public class ExampleController : ControllerBase
             new[] { "clientIdValue", "routeTemplateValue", "testValue3" }
         );
 
-        using (_metrics.Measure.Timer.Time(MetricsRegistry.ExampleTimerOptions, tags))
+        TimerContext? timerContext = null;
+        try
         {
+            timerContext = StartTimer(MetricsRegistry.ExampleTimerOptions, tags);
             MeasuredMethod(milliseconds);
         }
+        finally
+        {
+            StopTimer(timerContext);
+        }
 
+        // using (_metrics.Measure.Timer.Time(MetricsRegistry.ExampleTimerOptions, tags))
+        // {
+        //     MeasuredMethod(milliseconds);
+        // }
         return "Request processed after " + milliseconds + "milliseconds";
     }
 
+    private TimerContext StartTimer(TimerOptions options, MetricTags tags)
+    {
+        return _metrics.Measure.Timer.Time(options, tags);
+    }
+
+    private void StopTimer(TimerContext? timerContext)
+    {
+        timerContext?.Dispose();
+    }
+
+    private static void MeasuredMethod(int milliseconds)
+    {
+        Thread.Sleep(milliseconds);
+    }
 
     [HttpGet("UpdateHistogram/{number}")]
     public string UpdateHistogram(int number)
@@ -108,10 +133,6 @@ public class ExampleController : ControllerBase
         return "Histogram observed " + number;
     }
 
-    private static void MeasuredMethod(int milliseconds)
-    {
-        Thread.Sleep(milliseconds);
-    }
 
     [HttpGet("WriteLog/{number}")]
     public string WriteLog(int number)
