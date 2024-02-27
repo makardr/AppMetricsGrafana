@@ -1,8 +1,4 @@
-﻿using System.Diagnostics;
-using System.Text;
-using App.Metrics;
-using App.Metrics.Timer;
-using AppMetricsGrafana.Metrics;
+﻿using AppMetricsGrafana.Metrics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AppMetricsGrafana.Controllers;
@@ -11,114 +7,69 @@ namespace AppMetricsGrafana.Controllers;
 [Route("api/[controller]")]
 public class ExampleController : ControllerBase
 {
-    private readonly ILogger<ExampleController> _logger;
-    private readonly IMetricsRoot _metrics;
-    private readonly Process _process;
+    private readonly IAppTelemetry _telemetry;
 
-    public ExampleController(ILogger<ExampleController> logger, IMetricsRoot metrics)
+    public ExampleController(IAppTelemetry telemetry)
     {
-        _logger = logger;
-        _metrics = metrics;
-        _process = Process.GetCurrentProcess();
+        _telemetry = telemetry;
     }
 
     [HttpGet("echo/{text}")]
-    public String Echo(string text)
+    public string Echo(string text)
     {
-        _logger.LogInformation("Received message: {message}", text);
         return text;
     }
 
-    [HttpGet("SetGauge")]
-    public String SetGauge()
+    [HttpGet("SetGauge/{number}")]
+    public string SetGauge(int number)
     {
-        Random random = new Random();
-        int num = random.Next(1, 100);
-        _metrics.Measure.Gauge.SetValue(MetricsRegistry.ExampleGaugeOptions, num);
-        return "Gauge set to " + num;
+        _telemetry.SetGaugeMetrics(number);
+        return "Gauge set to " + number;
     }
 
     [HttpGet("ResetGauge")]
-    public String ResetGauge()
+    public string ResetGauge()
     {
-        _metrics.Measure.Gauge.SetValue(MetricsRegistry.ExampleGaugeOptions, 0);
+        _telemetry.ResetGaugeMetrics();
         return "Gauge Reset";
     }
 
     [HttpGet("AddCounter")]
     public string AddCounter()
     {
-        _metrics.Measure.Counter.Increment(MetricsRegistry.ExampleCounterOptions, 1);
+        _telemetry.AddCounterMetrics();
         return "Counter added";
     }
 
     [HttpGet("SubtractCounter")]
     public string SubtractCounter()
     {
-        _metrics.Measure.Counter.Increment(MetricsRegistry.ExampleCounterOptions, -1);
+        _telemetry.SubtractCounterMetrics();
         return "Counter subtracted";
     }
 
     [HttpGet("GetProcessMemory")]
-    public long GetProcessMemory()
+    public string GetProcessMemory()
     {
-        var memory = _process.WorkingSet64;
-        _metrics.Measure.Gauge.SetValue(MetricsRegistry.ProcessPhysicalMemoryGauge, memory / 1024.0 / 1024.0);
-        return memory;
+        var memory = _telemetry.GetProcessMetricsMemory() / 1024.0 / 1024.0 ;
+        return memory + "MB";
     }
 
     [HttpGet("OutputMetrics")]
-    public async void OutputMetrics()
+    public void OutputMetrics()
     {
-        var snapshot = _metrics.Snapshot.Get();
-
-        foreach (var formatter in _metrics.OutputMetricsFormatters)
-        {
-            using (var stream = new MemoryStream())
-            {
-                await formatter.WriteAsync(stream, snapshot);
-
-                var result = Encoding.UTF8.GetString(stream.ToArray());
-
-                Console.WriteLine(result);
-            }
-        }
+        _telemetry.OutputMetricsMetrics();
     }
 
     [HttpGet("MeasureTimer/{milliseconds}")]
     public string MeasureTimer(int milliseconds)
     {
-        var tags = new MetricTags(
-            new[] { "client_idKey", "routeKey", "testKey3" },
-            new[] { "clientIdValue", "routeTemplateValue", "testValue3" }
-        );
-
-        TimerContext? timerContext = null;
-        try
+        using (_telemetry.MeasureTimerMetrics())
         {
-            timerContext = StartTimer(MetricsRegistry.ExampleTimerOptions, tags);
             MeasuredMethod(milliseconds);
         }
-        finally
-        {
-            StopTimer(timerContext);
-        }
 
-        // using (_metrics.Measure.Timer.Time(MetricsRegistry.ExampleTimerOptions, tags))
-        // {
-        //     MeasuredMethod(milliseconds);
-        // }
         return "Request processed after " + milliseconds + "milliseconds";
-    }
-
-    private TimerContext StartTimer(TimerOptions options, MetricTags tags)
-    {
-        return _metrics.Measure.Timer.Time(options, tags);
-    }
-
-    private void StopTimer(TimerContext? timerContext)
-    {
-        timerContext?.Dispose();
     }
 
     private static void MeasuredMethod(int milliseconds)
@@ -129,17 +80,7 @@ public class ExampleController : ControllerBase
     [HttpGet("UpdateHistogram/{number}")]
     public string UpdateHistogram(int number)
     {
-        _metrics.Measure.Histogram.Update(MetricsRegistry.ExampleHistogramOptions, number);
+        _telemetry.UpdateHistogramMetrics(number);
         return "Histogram observed " + number;
-    }
-
-
-    [HttpGet("WriteLog/{number}")]
-    public string WriteLog(int number)
-    {
-        Random rnd = new Random();
-        int randomNumber = rnd.Next(1, 100);
-        _logger.LogInformation("Logged number is {number} and logged number is {randomNumber}", number, randomNumber);
-        return "Log created with logged number " + number + " and random number " + randomNumber;
     }
 }

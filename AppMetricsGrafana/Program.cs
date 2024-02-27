@@ -1,14 +1,14 @@
 using App.Metrics;
 using App.Metrics.AspNetCore;
 using App.Metrics.Formatters.Prometheus;
-using AppMetricsGrafana;
+using AppMetricsGrafana.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 //Metrics
 var metricsBuilder = new MetricsBuilder()
-        .OutputMetrics.AsPrometheusProtobuf();
+    .OutputMetrics.AsPrometheusProtobuf();
 
 var metrics = metricsBuilder.Build();
 
@@ -16,17 +16,19 @@ var metrics = metricsBuilder.Build();
 builder.WebHost.UseMetricsWebTracking();
 
 //Output to /metrics
-builder.WebHost.UseMetrics(options => { options.EndpointOptions = endpointOptions =>
+builder.WebHost.UseMetrics(options =>
 {
-    endpointOptions.MetricsEndpointOutputFormatter = new MetricsPrometheusProtobufOutputFormatter();
-    endpointOptions.EnvironmentInfoEndpointEnabled = false;
-}; });
+    options.EndpointOptions = endpointOptions =>
+    {
+        endpointOptions.MetricsEndpointOutputFormatter = new MetricsPrometheusProtobufOutputFormatter();
+        endpointOptions.EnvironmentInfoEndpointEnabled = false;
+    };
+});
 
 builder.Services.AddMetrics(metrics);
 
-
-
 // Add services to the container.
+builder.Services.AddSingleton<IAppTelemetry, AppTelemetry>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -50,9 +52,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-    
+
 app.Run();
-
-
-
-
