@@ -22,6 +22,7 @@ services:
     image: grafana/agent:latest
     environment:
       - SCW_API_KEY=${SCW_API_KEY}
+      - VERSION=${VERSION}
     command: [ "-config.expand-env" ]
     restart: on-failure
     volumes:

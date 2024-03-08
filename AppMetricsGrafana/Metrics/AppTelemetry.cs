@@ -64,7 +64,7 @@ public class AppTelemetry : IAppTelemetry
     public IDisposable MeasureTimerMetrics()
     {
         var tags = new MetricTags(
-            new[] { "client_idKey", "routeKey", "testKey3" },
+            new[] { "client_idKey", "routeKey", "testKey1" },
             new[] { "clientIdValue", "routeTemplateValue", "testValue3" }
         );
 

@@ -2,6 +2,8 @@
   wal_directory: /tmp/agent
   global:
     scrape_interval: 15s
+    external_labels:
+      version: ${VERSION}
   configs:
     - name: prometheus_scrape
       scrape_configs:
